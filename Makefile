@@ -5,3 +5,7 @@ run:
 .PHONY: build
 build:
 	go build -o bot cmd/bot/main.go
+
+.PHONY: test
+test:
+	go test ./...

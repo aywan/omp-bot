@@ -1,4 +1,4 @@
-package subdomain
+package bank_account
 
 import "testing"
 
@@ -17,36 +17,36 @@ func TestEmptyService(t *testing.T) {
 func TestSimpleCRUD(t *testing.T) {
 	service := NewService()
 
-	aTitle := "a"
+	aNumber := "001"
+	account := newTestBankAccount(aNumber)
 
-	aId, err := service.Create(Subdomain{
-		Title: aTitle,
-	})
+	aId, err := service.Create(*account)
 	if err != nil {
 		t.Error(err)
 	}
 
-	aModel, err := service.Describe(aId)
+	item, err := service.Describe(aId)
 	if err != nil {
 		t.Error(err)
 	}
-	if aModel.Title != aTitle {
-		t.Errorf("wrong model title returns %s != %s", aModel.Title, aTitle)
+	if item.Number != aNumber {
+		t.Errorf("wrong model title returns %s != %s", item.Number, aNumber)
 	}
 
-	aNewTitle := "a - new"
+	bNumber := "002"
+	account.Number = bNumber
 
-	err = service.Update(aId, Subdomain{Title: aNewTitle})
+	err = service.Update(aId, *account)
 	if err != nil {
 		t.Error(err)
 	}
 
-	aModel, err = service.Describe(aId)
+	item, err = service.Describe(aId)
 	if err != nil {
 		t.Error(err)
 	}
-	if aModel.Title != aNewTitle {
-		t.Errorf("wrong model title returns %s != %s", aModel.Title, aNewTitle)
+	if item.Number != bNumber {
+		t.Errorf("wrong model title returns %s != %s", item.Number, bNumber)
 	}
 
 	state, err := service.Remove(aId)
@@ -65,11 +65,11 @@ func TestSimpleCRUD(t *testing.T) {
 		t.Error("double delete returns true")
 	}
 
-	aModel, err = service.Describe(aId)
+	item, err = service.Describe(aId)
 	if err == nil {
 		t.Error("await error, nil returns")
 	}
-	if nil != aModel {
+	if nil != item {
 		t.Error("await nil, model returns")
 	}
 }
@@ -77,22 +77,23 @@ func TestSimpleCRUD(t *testing.T) {
 func TestServiceList(t *testing.T) {
 	service := NewService()
 
-	titles := []string{
-		"first",
-		"second",
-		"thirds",
-		"fourths",
-		"fifth",
+	numbers := []string{
+		"001",
+		"002",
+		"003",
+		"004",
+		"005",
 	}
 
-	titleIds := make(map[string]uint64)
+	numberIds := make(map[string]uint64)
 
-	for _, title := range titles {
-		id, err := service.Create(Subdomain{Title: title})
+	for _, title := range numbers {
+		account := newTestBankAccount(title)
+		id, err := service.Create(*account)
 		if err != nil {
 			t.Errorf("error when create new: %v", err)
 		}
-		titleIds[title] = id
+		numberIds[title] = id
 	}
 
 	items, err := service.List(0, 2)
@@ -102,8 +103,8 @@ func TestServiceList(t *testing.T) {
 	if len(items) != 2 {
 		t.Errorf("await list len 2, got %d items", len(items))
 	}
-	if items[0].Title != "first" && items[1].Title != "second" {
-		t.Errorf("await [first,second] titles, got [%s,%s]", items[0].Title, items[1].Title)
+	if items[0].Number != "001" && items[1].Number != "002" {
+		t.Errorf("await [001,002] numbers, got [%s,%s]", items[0].Number, items[1].Number)
 	}
 
 	items, err = service.List(items[1].GetId(), 3)
@@ -114,8 +115,8 @@ func TestServiceList(t *testing.T) {
 	if len(items) != 3 {
 		t.Errorf("await list len 3, got %d items", len(items))
 	}
-	if items[0].Title != "thirds" && items[1].Title != "fourths" && items[2].Title != "fifth" {
-		t.Errorf("await [thirds,fourths,fifth] titles, got [%s,%s,%s]", items[0].Title, items[1].Title, items[2].Title)
+	if items[0].Number != "003" && items[1].Number != "004" && items[2].Number != "005" {
+		t.Errorf("await [003,004,005] numbers, got [%s,%s,%s]", items[0].Number, items[1].Number, items[2].Number)
 	}
 
 	items, err = service.List(items[2].GetId(), 10)
@@ -123,9 +124,9 @@ func TestServiceList(t *testing.T) {
 		t.Error("await error, got nothing")
 	}
 
-	toRemoveTitles := []string{"thirds", "fifth", "first"}
+	toRemoveTitles := []string{"003", "005", "001"}
 	for _, title := range toRemoveTitles {
-		id := titleIds[title]
+		id := numberIds[title]
 
 		result, err := service.Remove(id)
 		if err != nil || !result {
@@ -140,7 +141,24 @@ func TestServiceList(t *testing.T) {
 	if len(items) != 2 {
 		t.Errorf("await list len 2, got %d items", len(items))
 	}
-	if items[0].Title != "second" && items[1].Title != "fourths" {
-		t.Errorf("await [second,fourths] titles, got [%s,%s]", items[0].Title, items[1].Title)
+	if items[0].Number != "002" && items[1].Number != "004" {
+		t.Errorf("await [002,004] numbers, got [%s,%s]", items[0].Number, items[1].Number)
 	}
+
+	_, err = service.Create(*newTestBankAccount("006"))
+	if err != nil {
+		t.Errorf("error when create new: %v", err)
+	}
+	items, err = service.List(items[1].GetId(), 100)
+	if len(items) != 1 {
+		t.Errorf("await list len 1, got %d items", len(items))
+	}
+	if items[0].Number != "006" {
+		t.Errorf("await [006] numbers, got [%s]", items[0].Number)
+	}
+}
+
+func newTestBankAccount(number string) *BankAccount {
+	account := NewBankAccount(1, true, number, "USD")
+	return &account
 }

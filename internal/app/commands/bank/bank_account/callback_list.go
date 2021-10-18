@@ -2,7 +2,6 @@ package bank_account
 
 import (
 	"encoding/json"
-	"fmt"
 	"log"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
@@ -10,7 +9,7 @@ import (
 )
 
 type CallbackListData struct {
-	Offset int `json:"offset"`
+	Cursor uint64 `json:"Cursor"`
 }
 
 func (c *BankBankAccountCommander) CallbackList(callback *tgbotapi.CallbackQuery, callbackPath path.CallbackPath) {
@@ -22,12 +21,6 @@ func (c *BankBankAccountCommander) CallbackList(callback *tgbotapi.CallbackQuery
 			"input string %v - %v", callbackPath.CallbackData, err)
 		return
 	}
-	msg := tgbotapi.NewMessage(
-		callback.Message.Chat.ID,
-		fmt.Sprintf("Parsed: %+v\n", parsedData),
-	)
-	_, err = c.bot.Send(msg)
-	if err != nil {
-		log.Printf("BankBankAccountCommander.CallbackList: error sending reply message to chat - %v", err)
-	}
+
+	c.List(callback.Message, parsedData.Cursor)
 }

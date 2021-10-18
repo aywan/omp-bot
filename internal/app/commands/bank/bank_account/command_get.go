@@ -1,6 +1,7 @@
 package bank_account
 
 import (
+	"fmt"
 	"log"
 	"strconv"
 
@@ -12,13 +13,29 @@ func (c *BankBankAccountCommander) Get(inputMessage *tgbotapi.Message) {
 
 	idx, err := strconv.ParseUint(args, 10, 64)
 	if err != nil {
+		msg := tgbotapi.NewMessage(
+			inputMessage.Chat.ID,
+			`/get__bank__bank_account $ACCOUNT_ID
+expect ACCOUNT_ID integer number`,
+		)
+		_, err = c.bot.Send(msg)
+		if err != nil {
+			log.Printf("BankBankAccountCommander.Get: error sending reply message to chat - %v", err)
+		}
+
 		log.Println("wrong args", args)
 		return
 	}
 
 	account, err := c.bankAccountService.Describe(idx)
 	if err != nil {
-		log.Printf("fail to get product with idx %d: %v", idx, err)
+		errText := fmt.Sprintf("fail to get product with idx %d: %v", idx, err)
+		msg := tgbotapi.NewMessage(inputMessage.Chat.ID, errText)
+		_, err = c.bot.Send(msg)
+		if err != nil {
+			log.Printf("BankBankAccountCommander.Get: error sending reply message to chat - %v", err)
+		}
+		log.Print(errText)
 		return
 	}
 

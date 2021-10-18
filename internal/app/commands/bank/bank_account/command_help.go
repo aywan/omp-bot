@@ -9,9 +9,9 @@ func (c *BankBankAccountCommander) Help(inputMessage *tgbotapi.Message) {
 	msg := tgbotapi.NewMessage(inputMessage.Chat.ID,
 		`Bank / Bank account commands:
 /help__bank__bank_account — print list of commands
-/get__bank__bank_account — get a entity
+/get__bank__bank_account $ACCOUNT_ID — get a entity
 /list__bank__bank_account — get a list of your entity
-/delete__bank__bank_account — delete an existing entity
+/delete__bank__bank_account $ACCOUNT_ID — delete an existing entity
 /new__bank__bank_account — create a new entity
 /edit__bank__bank_account — edit a entity
 `,

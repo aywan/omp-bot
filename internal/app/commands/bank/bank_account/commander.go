@@ -43,6 +43,10 @@ func (c *BankBankAccountCommander) HandleCommand(msg *tgbotapi.Message, commandP
 		c.Get(msg)
 	case "delete":
 		c.Delete(msg)
+	case "new":
+		c.New(msg)
+	case "edit":
+		c.Edit(msg)
 	default:
 		c.Default(msg)
 	}

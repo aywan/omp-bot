@@ -13,7 +13,7 @@ func (c *BankBankAccountCommander) Help(inputMessage *tgbotapi.Message) {
 /list__bank__bank_account — get a list of your entity
 /delete__bank__bank_account $ACCOUNT_ID — delete an existing entity
 /new__bank__bank_account — create a new entity
-/edit__bank__bank_account — edit a entity
+/edit__bank__bank_account $ACCOUNT_ID — edit a entity
 `,
 	)
 

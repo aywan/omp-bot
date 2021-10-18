@@ -6,31 +6,31 @@ import (
 	"log"
 )
 
-func (c *BankBankAccountCommander) Get(inputMessage *tgbotapi.Message) {
+func (c *BankBankAccountCommander) Delete(inputMessage *tgbotapi.Message) {
 
 	idx, err := parseAccountId(inputMessage)
 	if err != nil {
 		msg := tgbotapi.NewMessage(
 			inputMessage.Chat.ID,
-			`/get__bank__bank_account $ACCOUNT_ID
+			`/delete__bank__bank_account $ACCOUNT_ID
 expect ACCOUNT_ID integer number`,
 		)
 		_, err = c.bot.Send(msg)
 		if err != nil {
-			log.Printf("BankBankAccountCommander.Get: error sending reply message to chat - %v", err)
+			log.Printf("BankBankAccountCommander.Delete: error sending reply message to chat - %v", err)
 		}
 
 		log.Println(err)
 		return
 	}
 
-	account, err := c.bankAccountService.Describe(idx)
+	_, err = c.bankAccountService.Remove(idx)
 	if err != nil {
-		errText := fmt.Sprintf("fail to get account with idx %d: %v", idx, err)
+		errText := fmt.Sprintf("fail to delete account with idx %d: %v", idx, err)
 		msg := tgbotapi.NewMessage(inputMessage.Chat.ID, errText)
 		_, err = c.bot.Send(msg)
 		if err != nil {
-			log.Printf("BankBankAccountCommander.Get: error sending reply message to chat - %v", err)
+			log.Printf("BankBankAccountCommander.Delete: error sending reply message to chat - %v", err)
 		}
 		log.Print(errText)
 		return
@@ -38,11 +38,11 @@ expect ACCOUNT_ID integer number`,
 
 	msg := tgbotapi.NewMessage(
 		inputMessage.Chat.ID,
-		account.String(),
+		fmt.Sprintf("Succesfuly delete account with idx %d", idx),
 	)
 
 	_, err = c.bot.Send(msg)
 	if err != nil {
-		log.Printf("BankBankAccountCommander.Get: error sending reply message to chat - %v", err)
+		log.Printf("BankBankAccountCommander.Delete: error sending reply message to chat - %v", err)
 	}
 }

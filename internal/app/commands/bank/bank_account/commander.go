@@ -41,6 +41,8 @@ func (c *BankBankAccountCommander) HandleCommand(msg *tgbotapi.Message, commandP
 		c.List(msg, 0)
 	case "get":
 		c.Get(msg)
+	case "delete":
+		c.Delete(msg)
 	default:
 		c.Default(msg)
 	}

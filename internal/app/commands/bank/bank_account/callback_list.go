@@ -9,7 +9,7 @@ import (
 )
 
 type CallbackListData struct {
-	Cursor uint64 `json:"Cursor"`
+	Page uint64 `json:"page"`
 }
 
 func (c *BankBankAccountCommander) CallbackList(callback *tgbotapi.CallbackQuery, callbackPath path.CallbackPath) {
@@ -22,5 +22,5 @@ func (c *BankBankAccountCommander) CallbackList(callback *tgbotapi.CallbackQuery
 		return
 	}
 
-	c.List(callback.Message, parsedData.Cursor)
+	c.List(callback.Message, parsedData.Page)
 }

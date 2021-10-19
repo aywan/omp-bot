@@ -34,20 +34,15 @@ func (s *Service) Describe(ID uint64) (*bank.BankAccount, error) {
 
 func (s *Service) List(cursor uint64, limit uint64) ([]bank.BankAccount, error) {
 	if limit == 0 {
-		return []bank.BankAccount{}, nil
-	}
-
-	pos := 0
-	if cursor > 0 {
-		pos = s.findIndexPosition(cursor) + 1
-	}
-	if pos >= len(s.entitiesIndex) {
 		return nil, nil
 	}
 
+	s.indexSync.RLock()
+	defer s.indexSync.RUnlock()
+
 	slice := make([]bank.BankAccount, 0, limit)
 	foundElements := uint64(0)
-	for i := pos; i < len(s.entitiesIndex); i++ {
+	for i := cursor; i < uint64(len(s.entitiesIndex)); i++ {
 		ID := s.entitiesIndex[i]
 		slice = append(slice, *s.entities[ID])
 		foundElements++

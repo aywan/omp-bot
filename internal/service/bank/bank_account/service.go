@@ -2,19 +2,28 @@ package bank_account
 
 import (
 	"fmt"
+	"github.com/ozonmp/omp-bot/internal/model/bank"
 	"sort"
 	"sync"
 	"sync/atomic"
 )
 
+type ServiceInterface interface {
+	Describe(ID uint64) (*bank.BankAccount, error)
+	List(cursor uint64, limit uint64) ([]bank.BankAccount, error)
+	Create(bankAccount bank.BankAccount) (uint64, error)
+	Update(ID uint64, bankAccount bank.BankAccount) error
+	Remove(ID uint64) (bool, error)
+}
+
 type Service struct {
-	entities      map[uint64]*BankAccount
+	entities      map[uint64]*bank.BankAccount
 	entitiesIndex []uint64
 	indexSync     sync.RWMutex
 	seriesId      uint64
 }
 
-func (s *Service) Describe(ID uint64) (*BankAccount, error) {
+func (s *Service) Describe(ID uint64) (*bank.BankAccount, error) {
 	s.indexSync.RLock()
 	defer s.indexSync.RUnlock()
 	if m, ok := s.entities[ID]; ok {
@@ -23,9 +32,9 @@ func (s *Service) Describe(ID uint64) (*BankAccount, error) {
 	return nil, fmt.Errorf("not found model with id=%d", ID)
 }
 
-func (s *Service) List(cursor uint64, limit uint64) ([]BankAccount, error) {
+func (s *Service) List(cursor uint64, limit uint64) ([]bank.BankAccount, error) {
 	if limit == 0 {
-		return []BankAccount{}, nil
+		return []bank.BankAccount{}, nil
 	}
 
 	pos := 0
@@ -33,10 +42,10 @@ func (s *Service) List(cursor uint64, limit uint64) ([]BankAccount, error) {
 		pos = s.findIndexPosition(cursor) + 1
 	}
 	if pos >= len(s.entitiesIndex) {
-		return []BankAccount{}, fmt.Errorf("no more elements")
+		return nil, nil
 	}
 
-	slice := make([]BankAccount, 0, limit)
+	slice := make([]bank.BankAccount, 0, limit)
 	foundElements := uint64(0)
 	for i := pos; i < len(s.entitiesIndex); i++ {
 		ID := s.entitiesIndex[i]
@@ -51,21 +60,21 @@ func (s *Service) List(cursor uint64, limit uint64) ([]BankAccount, error) {
 	return slice, nil
 }
 
-func (s *Service) Create(subdomain BankAccount) (uint64, error) {
+func (s *Service) Create(bankAccount bank.BankAccount) (uint64, error) {
 	s.indexSync.Lock()
 	defer s.indexSync.Unlock()
 
 	id := s.getNextId()
-	subdomainNew := recreateBankAccount(id, subdomain)
+	accountWithId := bank.CreateWithId(id, bankAccount)
 
-	s.entities[id] = subdomainNew
+	s.entities[id] = accountWithId
 	s.entitiesIndex = append(s.entitiesIndex, id)
 
 	return id, nil
 }
 
-func (s *Service) Update(ID uint64, subdomain BankAccount) error {
-	updatingSubdomain, err := s.Describe(ID)
+func (s *Service) Update(ID uint64, bankAccount bank.BankAccount) error {
+	updatingRow, err := s.Describe(ID)
 	if err != nil {
 		return err
 	}
@@ -73,7 +82,7 @@ func (s *Service) Update(ID uint64, subdomain BankAccount) error {
 	s.indexSync.Lock()
 	defer s.indexSync.Unlock()
 
-	updatingSubdomain.fillFrom(subdomain)
+	updatingRow.RefillFromAnother(bankAccount)
 
 	return nil
 }
@@ -107,7 +116,7 @@ func (s *Service) findIndexPosition(ID uint64) int {
 
 func NewService() ServiceInterface {
 	service := &Service{
-		entities:      make(map[uint64]*BankAccount, 0),
+		entities:      make(map[uint64]*bank.BankAccount, 0),
 		entitiesIndex: make([]uint64, 0),
 		seriesId:      0,
 	}
@@ -118,20 +127,20 @@ func NewService() ServiceInterface {
 func NewDummyBankAccountService() ServiceInterface {
 	service := NewService()
 
-	_, _ = service.Create(NewBankAccount(1, true, "00001", "USD"))
-	_, _ = service.Create(NewBankAccount(1, false, "00002", "RUB"))
-	_, _ = service.Create(NewBankAccount(2, true, "00003", "EUR"))
-	_, _ = service.Create(NewBankAccount(2, true, "00004", "USD"))
-	_, _ = service.Create(NewBankAccount(2, true, "00005", "RUB"))
-	_, _ = service.Create(NewBankAccount(2, false, "00006", "USD"))
-	_, _ = service.Create(NewBankAccount(2, true, "00007", "USD"))
-	_, _ = service.Create(NewBankAccount(3, true, "00008", "EUR"))
-	_, _ = service.Create(NewBankAccount(3, false, "00009", "USD"))
-	_, _ = service.Create(NewBankAccount(3, true, "00010", "USD"))
-	_, _ = service.Create(NewBankAccount(4, true, "00011", "RUB"))
-	_, _ = service.Create(NewBankAccount(5, false, "00012", "USD"))
-	_, _ = service.Create(NewBankAccount(5, true, "00013", "USD"))
-	_, _ = service.Create(NewBankAccount(5, false, "00014", "USD"))
+	_, _ = service.Create(bank.NewBankAccount(1, true, "00001", "USD"))
+	_, _ = service.Create(bank.NewBankAccount(1, false, "00002", "RUB"))
+	_, _ = service.Create(bank.NewBankAccount(2, true, "00003", "EUR"))
+	_, _ = service.Create(bank.NewBankAccount(2, true, "00004", "USD"))
+	_, _ = service.Create(bank.NewBankAccount(2, true, "00005", "RUB"))
+	_, _ = service.Create(bank.NewBankAccount(2, false, "00006", "USD"))
+	_, _ = service.Create(bank.NewBankAccount(2, true, "00007", "USD"))
+	_, _ = service.Create(bank.NewBankAccount(3, true, "00008", "EUR"))
+	_, _ = service.Create(bank.NewBankAccount(3, false, "00009", "USD"))
+	_, _ = service.Create(bank.NewBankAccount(3, true, "00010", "USD"))
+	_, _ = service.Create(bank.NewBankAccount(4, true, "00011", "RUB"))
+	_, _ = service.Create(bank.NewBankAccount(5, false, "00012", "USD"))
+	_, _ = service.Create(bank.NewBankAccount(5, true, "00013", "USD"))
+	_, _ = service.Create(bank.NewBankAccount(5, false, "00014", "USD"))
 
 	return service
 }

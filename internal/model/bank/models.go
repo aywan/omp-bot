@@ -1,4 +1,4 @@
-package bank_account
+package bank
 
 import (
 	"fmt"
@@ -41,16 +41,16 @@ func NewBankAccount(userId uint64, isLegal bool, number string, currency string)
 	}
 }
 
-func recreateBankAccount(ID uint64, source BankAccount) *BankAccount {
+func CreateWithId(ID uint64, source BankAccount) *BankAccount {
 	// TODO подумать про заворачиваниe в id VO на уровне сервиса.
 
 	newAccount := &BankAccount{id: ID}
-	newAccount.fillFrom(source)
+	newAccount.RefillFromAnother(source)
 
 	return newAccount
 }
 
-func (s *BankAccount) fillFrom(account BankAccount) {
+func (s *BankAccount) RefillFromAnother(account BankAccount) {
 	s.UserId = account.UserId
 	s.IsLegal = account.IsLegal
 	s.Number = account.Number
@@ -62,6 +62,7 @@ func (s *BankAccount) fillFrom(account BankAccount) {
 func (s *BankAccount) GetId() uint64 {
 	return s.id
 }
+
 func (s *BankAccount) SetTotalAmount(newTotalAmount big.Float) {
 	s.TotalAmount = newTotalAmount
 }

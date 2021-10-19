@@ -1,4 +1,4 @@
-package bank_account
+package bank
 
 import (
 	"math/big"
@@ -33,7 +33,7 @@ func TestRecreateBankAccount(t *testing.T) {
 
 	id := rand.Uint64()
 
-	account := recreateBankAccount(id, baseAccount)
+	account := CreateWithId(id, baseAccount)
 
 	if &baseAccount == account {
 		t.Error("struct has same addresses")

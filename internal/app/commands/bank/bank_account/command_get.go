@@ -10,6 +10,8 @@ func (c *BankBankAccountCommander) Get(inputMessage *tgbotapi.Message) {
 
 	idx, err := parseAccountId(inputMessage)
 	if err != nil {
+		log.Println(err)
+
 		msg := tgbotapi.NewMessage(
 			inputMessage.Chat.ID,
 			`/get__bank__bank_account $ACCOUNT_ID
@@ -20,7 +22,6 @@ expect ACCOUNT_ID integer number`,
 			log.Printf("BankBankAccountCommander.Get: error sending reply message to chat - %v", err)
 		}
 
-		log.Println(err)
 		return
 	}
 

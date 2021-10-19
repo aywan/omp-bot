@@ -1,13 +1,16 @@
 package bank_account
 
-import "testing"
+import (
+	"github.com/ozonmp/omp-bot/internal/model/bank"
+	"testing"
+)
 
 func TestEmptyService(t *testing.T) {
 	service := NewService()
 
 	items, err := service.List(0, 10)
-	if err == nil {
-		t.Error("await error, got nothing")
+	if err != nil {
+		t.Error("got error on empty")
 	}
 	if len(items) > 0 {
 		t.Error("empty service return value")
@@ -120,8 +123,11 @@ func TestServiceList(t *testing.T) {
 	}
 
 	items, err = service.List(items[2].GetId(), 10)
-	if err == nil {
-		t.Error("await error, got nothing")
+	if err != nil {
+		t.Errorf("got error %v", err)
+	}
+	if len(items) > 0 {
+		t.Errorf("await 0 items, got %d", len(items))
 	}
 
 	toRemoveTitles := []string{"003", "005", "001"}
@@ -158,7 +164,7 @@ func TestServiceList(t *testing.T) {
 	}
 }
 
-func newTestBankAccount(number string) *BankAccount {
-	account := NewBankAccount(1, true, number, "USD")
+func newTestBankAccount(number string) *bank.BankAccount {
+	account := bank.NewBankAccount(1, true, number, "USD")
 	return &account
 }

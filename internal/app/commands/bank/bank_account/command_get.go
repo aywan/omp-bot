@@ -6,9 +6,13 @@ import (
 	"log"
 )
 
+const getCommandHelpString = `/get__bank__bank_account $ACCOUNT_ID — get a entity
+	- ACCOUNT_ID - int, id of account`
+
 func (c *BankBankAccountCommander) Get(inputMessage *tgbotapi.Message) {
 
-	idx, err := parseAccountId(inputMessage)
+	args := newArgsScanner(inputMessage.CommandArguments())
+	idx, err := args.nextUInt64()
 	if err != nil {
 		log.Println(err)
 

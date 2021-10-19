@@ -6,9 +6,13 @@ import (
 	"log"
 )
 
+const deleteCommandDeleteString = `/delete__bank__bank_account $ACCOUNT_ID — delete an existing entity
+	-ACCOUNT_ID - int, id of account`
+
 func (c *BankBankAccountCommander) Delete(inputMessage *tgbotapi.Message) {
 
-	idx, err := parseAccountId(inputMessage)
+	args := newArgsScanner(inputMessage.CommandArguments())
+	idx, err := args.nextUInt64()
 	if err != nil {
 		log.Println(err)
 

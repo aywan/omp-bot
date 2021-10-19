@@ -9,6 +9,7 @@ import (
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 )
 
+const listCommandHelpString = `/list__bank__bank_account — get a list of your accounts`
 const defaultPerPage = 5
 
 func (c *BankBankAccountCommander) List(inputMessage *tgbotapi.Message, page uint64) {

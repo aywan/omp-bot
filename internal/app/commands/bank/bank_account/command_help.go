@@ -5,16 +5,17 @@ import (
 	"log"
 )
 
+const helpCommandHelpString = `/help__bank__bank_account — print list of commands`
+
 func (c *BankBankAccountCommander) Help(inputMessage *tgbotapi.Message) {
 	msg := tgbotapi.NewMessage(inputMessage.Chat.ID,
-		`Bank / Bank account commands:
-/help__bank__bank_account — print list of commands
-/get__bank__bank_account $ACCOUNT_ID — get a entity
-/list__bank__bank_account — get a list of your entity
-/delete__bank__bank_account $ACCOUNT_ID — delete an existing entity
-/new__bank__bank_account — create a new entity
-/edit__bank__bank_account $ACCOUNT_ID — edit a entity
-`,
+		"Bank / Bank account commands:\n"+
+			helpCommandHelpString+"\n"+
+			getCommandHelpString+"\n"+
+			listCommandHelpString+"\n"+
+			deleteCommandDeleteString+"\n"+
+			newCommandHelpString+"\n"+
+			editCommandHelpString,
 	)
 
 	_, err := c.bot.Send(msg)
